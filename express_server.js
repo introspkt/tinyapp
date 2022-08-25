@@ -21,6 +21,20 @@ app.use(express.urlencoded({ extended: true }));
 function generateRandomString(){
   return Math.random().toString(36).slice(2, 8);
 };
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -68,6 +82,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+//For Short URLS 
 app.post("/urls/:shortURL/delete",(req, res) => {
   console.log(req.body);
   delete urlDatabase[req.params.shortURL], req.params.shortURL;
@@ -97,7 +112,11 @@ app.post("/login", (req, res) => {
 //Logout Part
 app.get("/logout", (req, res) => {
   const templateVars = {username: req.cookies["username"]};
-  res.render("urls_show", templateVars);
+  let randomUserID = generateRandomString(); // generate randomUserID  
+  users[randomUserID] = {
+    id: randomUserID,
+    email: req.body.email,
+    password: req.body.password
   res.redirect("/urls")
 });
 
