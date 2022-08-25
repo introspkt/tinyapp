@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
@@ -72,4 +73,4 @@ app.post("/urls/:shortURL/delete",(req, res) => {
   res.redirect("/urls");
 });
 
-console.log("hello")
+
