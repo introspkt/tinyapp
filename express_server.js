@@ -6,6 +6,7 @@ app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+app.use(cookieParser())
 app.use(bodyParser.urlencoded({extended: true}));
 
 function generateRandomString() {
@@ -34,6 +35,8 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -93,11 +96,30 @@ app.post("/urls/:shortURL/delete",(req, res) => {
 
 //Registration Section 
 app.get("/register", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies user: req.cookies["user"], userID: req.cookies["user_id"],}; 
+  const templateVars = { urls: urlDatabase, username: req.cookies, user: req.cookies["user"], userID: req.cookies["user_id"],}; 
   res.render("urls_register", templateVars);
 });
 
-//Login Part
+//Registration through form
+app.post("/register", (req, res) => {
+  // Variables needed for error evaluations:
+  const randomUserID = generateRandomString();
+  const userEmail = req.body.email; // just the email
+});
+
+//Evaluation In Case of Error 
+let evaluation = (getEmail(users, userEmail));
+  if (evaluation === true) {
+    console.log(`Error: 400. Email is already in use`);
+    res.status(400).send(`Error: 400. Email is already in use`);
+  }
+  // If email OR pwd are empty strings ...
+  if ((!req.body.email) || (!req.body.password)) {
+    console.log(`Error: 400. Invalid email or password`);
+    res.status(400).send(`Error: 400. Invalid email or password`);
+  }
+
+  //Login Part
 app.get("/login", (req, res) => {
   res.redirect("/urls")
 });
@@ -119,8 +141,16 @@ app.get("/logout", (req, res) => {
     id: randomUserID,
     email: req.body.email,
     password: req.body.password
+  } 
   res.cookie("username", randomUserID)
   res.redirect("/urls")
+});
+
+//Login In Header
+app.get("/login", (req, res) => {
+  const templateVars = {/*username: req.cookies["username"]*/ user: req.cookies["user"], userID: req.cookies["user_id"],};
+  res.render("urls_show", templateVars); // Passes "username" to /login route
+  res.redirect("/urls");
 });
 
 //Removing cookies upon logging out 
@@ -129,3 +159,5 @@ app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
 });
+
+

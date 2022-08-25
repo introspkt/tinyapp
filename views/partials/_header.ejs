@@ -11,7 +11,7 @@
       </div>
     </div>
   </nav>
-  <% if (user) { %>
+  <% if (locals.user) { %>
     <form method="POST" action="/logout">
       <label>Logged in as: <%= user ["email"] %>!</label>
       <button type="logout" class="btn btn-primary">Log Out</button>
