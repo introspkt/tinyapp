@@ -60,7 +60,9 @@ app.post("/urls", (req, res) => {
 
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { user: req.cookies["user"], userID: req.cookies["user_id"],};
+  res.render("urls_new", templateVars);
+  
 });
 
 app.post("/urls", (req, res) => {
@@ -91,7 +93,7 @@ app.post("/urls/:shortURL/delete",(req, res) => {
 
 //Registration Section 
 app.get("/register", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = { urls: urlDatabase, username: req.cookies user: req.cookies["user"], userID: req.cookies["user_id"],}; 
   res.render("urls_register", templateVars);
 });
 
@@ -117,6 +119,7 @@ app.get("/logout", (req, res) => {
     id: randomUserID,
     email: req.body.email,
     password: req.body.password
+  res.cookie("username", randomUserID)
   res.redirect("/urls")
 });
 
