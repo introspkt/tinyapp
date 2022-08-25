@@ -5,6 +5,7 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
 function generateRandomString() {
@@ -72,5 +73,28 @@ app.post("/urls/:shortURL/delete",(req, res) => {
   delete urlDatabase[req.params.shortURL], req.params.shortURL;
   res.redirect("/urls");
 });
+//Login Part
+app.get("/login", (req, res) => {
+  res.redirect("/urls")
+});
 
+//Collecting cookies at login
+app.post("/login", (req, res) => {
+  console.log(req.body);
 
+  res.cookie("username", req.body.username);
+
+  res.redirect("/urls");
+});
+
+//Logout Part
+app.get("/logout", (req, res) => {
+  res.redirect("/urls")
+});
+
+//Removing cookies upon logging out 
+app.post("/logout", (req, res) => {
+  console.log(req.body); 
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
