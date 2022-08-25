@@ -89,6 +89,8 @@ app.post("/login", (req, res) => {
 
 //Logout Part
 app.get("/logout", (req, res) => {
+  const templateVars = {username: req.cookies["username"]};
+  res.render("urls_show", templateVars);
   res.redirect("/urls")
 });
 
