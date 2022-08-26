@@ -56,6 +56,31 @@ const checkUserPresence = function(obj, email, pwd) {
   }
 };
 
+const getUserID = function(userObj, email) {
+  let user_id;
+  for (let user in userObj) {
+    let emails = userObj[user].email;
+    if (emails === email) {
+      user_id = userObj[user].id
+    }
+  }
+  return user_id;
+}
+
+const urlsForUser = function(id, databaseObj) {
+  let newUserObj = {};
+
+  // identify which DATABASE object contains the same ID as current user
+  for (const shortURL in databaseObj) {
+    let databaseUserID = databaseObj[shortURL].userID;
+
+    if (id === databaseUserID) {
+      newUserObj[shortURL] = databaseObj[shortURL];
+    }
+  }
+  return newUserObj;
+};
+
 
 
 //Welcome Page 
@@ -112,7 +137,7 @@ app.post("/urls", (req, res) => {
   console.log(req.body); 
   //res.send("Ok"); 
   let randomString = generateRandomString();
-  urlDatabase[randomString] = {longURL: req.body.longURL, userID: req.cookies["user_id"].id};
+  urlDatabase[randomString] = {longURL: req.body.longURL, userID: req.cookies["user_id"]};
   res.redirect(`/urls/${randomString}`)
 
 });
@@ -191,9 +216,12 @@ app.post("/login", (req, res) => {
 });
 
   //Cookies Part
-  const userObj = users[randomUserID] 
-  res.cookie("username", randomUserID)
-  res.redirect("/urls")
+  const userObj = users[randomUserID]; 
+  res.cookie("user", userObj); 
+  const foundUserID = getUserID(users, req.body.email);
+  res.cookie("user_id", foundUserID)
+  res.redirect("/urls"); 
+
 
 
 //Login In Header
@@ -214,7 +242,9 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   console.log(req.body); 
   res.clearCookie("username");
-  res.redirect("/urls");
+  res.clearCookie("user_id"); 
+  res.clearCookie("username"); 
+  res.redirect("/landing");
 });
 
 // Error evaluations:
@@ -231,6 +261,10 @@ app.post("/logout", (req, res) => {
 // Happy state:
 res.cookie("user", req.body); 
 res.redirect("/urls");
+const foundUserID = getUserID(users, req.body.email);
+res.cookie("user_id", foundUserID)
+res.redirect("/urls");
+
 
 // Logout Through Header 
 app.get("/logout", (req, res) => {
