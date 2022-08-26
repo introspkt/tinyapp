@@ -7,6 +7,7 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 app.use(cookieParser())
+const bcrypt = require('bcryptjs');
 app.use(bodyParser.urlencoded({extended: true}));
 
 const generateRandomString = function() {
@@ -27,12 +28,15 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    //password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    //password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
+
   }
 };
 
@@ -48,8 +52,9 @@ const getEmail = function(obj, str) {
 
 //If email in database 
 const checkUserPresence = function(obj, email, pwd) {
+  const emailPwdMatch = function(obj, email, pwd) {
   for (const id in obj) {
-    if ((obj[id].email === email) && (obj[id].password === pwd)) {
+    if ((obj[id].email === email) && (bcrypt.compareSync(pwd,obj[id].password))) {
       // console.log(true);
       return true; // Valid - email & password pair exists, so user exists
     }
@@ -61,20 +66,20 @@ const getUserID = function(userObj, email) {
   for (let user in userObj) {
     let emails = userObj[user].email;
     if (emails === email) {
-      user_id = userObj[user].id
+      user_id = userObj[user].id;
     }
   }
   return user_id;
-}
+};
 
-const urlsForUser = function(id, databaseObj) {
+const urlsForUser = function(USERid, databaseObj) {
   let newUserObj = {};
 
   // identify which DATABASE object contains the same ID as current user
   for (const shortURL in databaseObj) {
     let databaseUserID = databaseObj[shortURL].userID;
 
-    if (id === databaseUserID) {
+    if (USERid === databaseUserID) {
       newUserObj[shortURL] = databaseObj[shortURL];
     }
   }
@@ -101,7 +106,7 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
   if (!req.cookies["user"]) {
     res.status(400).send(`Error: 400. Please log in or register`);
-    res.redirect("/landing")
+    res.redirect("/landing");
   }
   res.render("urls_index", templateVars);
 });
@@ -128,7 +133,7 @@ app.get("/login", (req, res) => {
 /*---Actions with URLs---*/
 //  Create new URLs page
 app.get("/urls/new", (req, res) => {
-  const templateVars = {user: req.cookies["user"], user: req.cookies ["user"], user: req.cookies["user_id"]};
+  const templateVars = {urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
   res.render("urls_new", templateVars);
 });
 
@@ -137,6 +142,8 @@ app.post("/urls", (req, res) => {
   console.log(req.body); 
   //res.send("Ok"); 
   let randomString = generateRandomString();
+  const userID = req.cookies["user_id"];
+  urlsForUser(urlDatabase, userID);
   urlDatabase[randomString] = {longURL: req.body.longURL, userID: req.cookies["user_id"]};
   res.redirect(`/urls/${randomString}`)
 
@@ -150,7 +157,8 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // Deleting URLS
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
+  const userID = req.cookies["user_id"];
+  urlsForUser(urlDatabase, userID);
   delete urlDatabase[req.params.shortURL], req.params.shortURL; // Deletes URL entry
   res.redirect("/urls"); // Redirects to main urls_index page
 });
@@ -163,6 +171,8 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Edit URL from /URLs homepage
 app.post("/urls/:shortURL", (req, res) => {
+  const userID = req.cookies["user_id"];
+  urlsForUser(urlDatabase, userID);
   urlDatabase[req.params.shortURL].longURL = req.body.newLongURL;
   res.redirect(`/urls/${req.params.shortURL}`);
 });
@@ -194,6 +204,14 @@ let evaluation = (getEmail(users, userEmail));
     res.status(400).send(`Error: 400. Invalid email or password`);
   }
 
+  // If no errors ...
+  users[randomUserID] = {
+    id: randomUserID,
+    email: req.body.email,
+    // password: req.body.password,
+    password: bcrypt.hashSync(req.body.password, 10)
+  };
+
   //Login Part
 app.get("/login", (req, res) => {
   res.redirect("/urls")
@@ -219,7 +237,7 @@ app.post("/login", (req, res) => {
   const userObj = users[randomUserID]; 
   res.cookie("user", userObj); 
   const foundUserID = getUserID(users, req.body.email);
-  res.cookie("user_id", foundUserID)
+  res.cookie("user_id", foundUserID);
   res.redirect("/urls"); 
 
 
@@ -234,8 +252,8 @@ app.get("/login", (req, res) => {
 //Collecting Cookies Upon Login 
 app.post("/login", (req, res) => {
   const userEmail = req.body.email;
-  const userPassword = req.body.password;
-  const userPresence = checkUserPresence(users, userEmail, userPassword);
+  const userPassword = req.body.password; // For testing w/ bcrypt.compareSync; checks if input matches value in database
+  const userPresence = emailPwdMatch(users, userEmail, userPassword);
 });
 
  //Removing cookies upon logging out 
@@ -258,11 +276,11 @@ app.post("/logout", (req, res) => {
   res.status(403).send(`Error: 403. Incorrect input`);
 } 
 
-// Happy state:
+// Good state: If Email Matches Password
 res.cookie("user", req.body); 
 res.redirect("/urls");
 const foundUserID = getUserID(users, req.body.email);
-res.cookie("user_id", foundUserID)
+res.cookie("user_id", foundUserID);
 res.redirect("/urls");
 
 
