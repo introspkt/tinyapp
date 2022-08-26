@@ -58,8 +58,10 @@ const checkUserPresence = function(obj, email, pwd) {
 
 
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
+//Welcome Page 
+  app.get("/landing", (req, res) => {
+    const templateVars = { urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
+    res.render("urls_landing", templateVars);
 });
 
 app.listen(PORT, () => {
@@ -71,7 +73,11 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]}; 
+  const templateVars = { urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
+  if (!req.cookies["user"]) {
+    res.status(400).send(`Error: 400. Please log in or register`);
+    res.redirect("/landing")
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -178,20 +184,17 @@ app.post("/login", (req, res) => {
 });
 
 //Logout Part
-app.get("/logout", (req, res) => {
-  const templateVars = {username: req.cookies["username"]};
-  let randomUserID = generateRandomString(); // generate randomUserID  
-  users[randomUserID] = {
-    id: randomUserID,
-    email: req.body.email,
-    password: req.body.password
-  };
+  app.get("/logout", (req, res) => {
+  const templateVars = {user: req.cookies["user"], userID: req.cookies["user_id"]};
+  res.render("urls_show", templateVars); // Passes "user" to /logout route 
+  res.redirect("/landing");
+});
 
   //Cookies Part
-  const userObj = users[randomUserID];
+  const userObj = users[randomUserID] 
   res.cookie("username", randomUserID)
   res.redirect("/urls")
-});
+
 
 //Login In Header
 app.get("/login", (req, res) => {
