@@ -61,12 +61,18 @@ app.post("/urls", (req, res) => {
   res.send(generateRandomString())
 });
 
-
+//URLS 
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: req.cookies["user"], userID: req.cookies["user_id"],};
   res.render("urls_new", templateVars);
   
 });
+
+// Login Homepage
+app.get("/login", (req, res) => {
+  const templateVars = {urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
+  res.render("urls_login", templateVars)
+})
 
 app.post("/urls", (req, res) => {
   console.log(req.body); 

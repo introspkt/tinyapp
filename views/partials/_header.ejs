@@ -17,17 +17,12 @@
       <button type="logout" class="btn btn-primary">Log Out</button>
       </form>
     <% } else{ %>
-
+      <!-- Log In -->
       <form method="POST" action="/login">
         <input type="text" id="user" name="username" placeholder="Username">
-        <button type="submit" class="btn btn-primary">Log In</button>
+        <button type="submit" class="btn btnlight"><a href="/login"></a>>Log In</button>
       </form>
-      
-      <form method="POST" action="/register">
-        <input type="hidden">
-        <button type="submit" class="btn btn-warning" <a href="/register">Register</a></button>  
-      </form> <button type="submit" class="btn btn-warning"><a href="/register">Register</a></button> 
-
+      <button type="submit" class="btn btn-light"><a href="/register">Register</a></button>
     <% } %>
     </nav>
 </header>
