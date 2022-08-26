@@ -97,7 +97,7 @@ app.get("/login", (req, res) => {
 /*---Actions with URLs---*/
 //  Create new URLs page
 app.get("/urls/new", (req, res) => {
-  const templateVars = {user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = {user: req.cookies["user"], user: req.cookies ["user"], user: req.cookies["user_id"]};
   res.render("urls_new", templateVars);
 });
 
@@ -106,14 +106,14 @@ app.post("/urls", (req, res) => {
   console.log(req.body); 
   //res.send("Ok"); 
   let randomString = generateRandomString();
-  urlDatabase[randomString]= req.body.longURL;
+  urlDatabase[randomString] = {longURL: req.body.longURL, userID: req.cookies["user_id"].id};
   res.redirect(`/urls/${randomString}`)
 
 });
 
 //  longURL to shortURL
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = {shortURL: req.params.shortURL, long_URL: urlDatabase[req.params.shortURL].longURL, user: req.cookies["user"], userID: req.cookies["user_id"]};
   res.render("urls_show", templateVars);
 });
 
@@ -132,7 +132,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Edit URL from /URLs homepage
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.newLongURL;
+  urlDatabase[req.params.shortURL].longURL = req.body.newLongURL;
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
