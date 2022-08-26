@@ -5,11 +5,18 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
-app.use(cookieParser())
+const cookieSession = require('cookie-session');
+app.use(cookie-session())
 const bcrypt = require('bcryptjs');
+/*              MIDDLEWARE                */
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2'],
 
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 const generateRandomString = function() {
   return Math.random().toString(36).slice(2, 8);
 };
@@ -90,7 +97,7 @@ const urlsForUser = function(USERid, databaseObj) {
 
 //Welcome Page 
   app.get("/landing", (req, res) => {
-    const templateVars = { urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
+    const templateVars = { urls: urlDatabase, user: req.cookies["user"], userID: req.session["user_id"]};
     res.render("urls_landing", templateVars);
 });
 
@@ -119,21 +126,21 @@ app.post("/urls", (req, res) => {
 
 //URLS 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = { user: req.session["user"], userID: req.session["user_id"]};
   res.render("urls_new", templateVars);
   
 });
 
 // Login Homepage
 app.get("/login", (req, res) => {
-  const templateVars = {urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = {urls: urlDatabase, user: req.session["user"], userID: req.session["user_id"]};
   res.render("urls_login", templateVars)
 })
 
 /*---Actions with URLs---*/
 //  Create new URLs page
 app.get("/urls/new", (req, res) => {
-  const templateVars = {urls: urlDatabase, user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = {urls: urlDatabase, user: req.session["user"], userID: req.session["user_id"]};
   res.render("urls_new", templateVars);
 });
 
@@ -142,9 +149,9 @@ app.post("/urls", (req, res) => {
   console.log(req.body); 
   //res.send("Ok"); 
   let randomString = generateRandomString();
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   urlsForUser(urlDatabase, userID);
-  urlDatabase[randomString] = {longURL: req.body.longURL, userID: req.cookies["user_id"]};
+  urlDatabase[randomString] = {longURL: req.body.longURL, userID: req.session["user_id"]};
   res.redirect(`/urls/${randomString}`)
 
 });
@@ -180,7 +187,7 @@ app.post("/urls/:shortURL", (req, res) => {
 //User Accounts Section
 //Registration Section 
 app.get("/register", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies, user: req.cookies["user"], userID: req.cookies["user_id"]}; 
+  const templateVars = { urls: urlDatabase, username: req.session, user: req.session["user"], userID: req.session["user_id"]}; 
   res.render("urls_register", templateVars);
 });
 
@@ -228,7 +235,7 @@ app.post("/login", (req, res) => {
 
 //Logout Part
   app.get("/logout", (req, res) => {
-  const templateVars = {user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = {user: req.session["user"], userID: req.session["user_id"]};
   res.render("urls_show", templateVars); // Passes "user" to /logout route 
   res.redirect("/landing");
 });
@@ -244,7 +251,7 @@ app.post("/login", (req, res) => {
 
 //Login In Header
 app.get("/login", (req, res) => {
-  const templateVars = {user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = {user: req.session["user"], userID: req.session["user_id"]};
   res.render("urls_login", templateVars); // Loads up the login page
   res.redirect("/urls"); // redirects user to main page
 });
@@ -256,12 +263,10 @@ app.post("/login", (req, res) => {
   const userPresence = emailPwdMatch(users, userEmail, userPassword);
 });
 
- //Removing cookies upon logging out 
+ //Removing session upon logging out 
 app.post("/logout", (req, res) => {
   console.log(req.body); 
-  res.clearCookie("username");
-  res.clearCookie("user_id"); 
-  res.clearCookie("username"); 
+  req.session = null;
   res.redirect("/landing");
 });
 
@@ -273,20 +278,20 @@ app.post("/logout", (req, res) => {
 
  // If email already has an account ...
  if (userPresence !== true) {
-  res.status(403).send(`Error: 403. Incorrect input`);
+  res.status(403).send(`Error: 403. Incorrect login`);
 } 
 
 // Good state: If Email Matches Password
-res.cookie("user", req.body); 
+res.session("user", req.body); 
 res.redirect("/urls");
 const foundUserID = getUserID(users, req.body.email);
-res.cookie("user_id", foundUserID);
+res.session("user_id", foundUserID);
 res.redirect("/urls");
 
 
 // Logout Through Header 
 app.get("/logout", (req, res) => {
-  const templateVars = {user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const templateVars = {user: req.session["user"], userID: req.session["user_id"]};
   res.render("urls_show", templateVars); // Passes "user" to /logout route
   res.redirect("/urls");
 });
