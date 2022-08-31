@@ -9,6 +9,7 @@ const { generateRandomString, getEmail, emailPwdMatch, getUserID, urlsForUser } 
 const cookieSession = require('cookie-session');
 app.use(cookie-session())
 const bcrypt = require('bcryptjs');
+
 /*              MIDDLEWARE                */
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
@@ -18,11 +19,12 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+
 const generateRandomString = function() {
   return Math.random().toString(36).slice(2, 8);
 };
 
-
+/*               DATA                     */
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -44,6 +46,17 @@ const users = {
     email: "user2@example.com", 
     //password: "dishwasher-funk"
     password: bcrypt.hashSync("dishwasher-funk", 10)
+
+  },
+  "test1": {
+    id: "test1",
+    email: "test1@example.com",
+    password: bcrypt.hashSync("1", 10)
+  },
+  "test2": {
+    id: "test2",
+    email: "test2@example.com",
+    password: bcrypt.hashSync("2", 10)  
 
   }
 };
@@ -95,6 +108,7 @@ const urlsForUser = function(USERid, databaseObj) {
 };
 
 
+/*               ROUTES                   */
 
 //Welcome Page 
   app.get("/landing", (req, res) => {
@@ -160,6 +174,10 @@ app.post("/urls", (req, res) => {
 //  longURL to shortURL
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {shortURL: req.params.shortURL, long_URL: urlDatabase[req.params.shortURL].longURL, user: req.cookies["user"], userID: req.cookies["user_id"]};
+  const longURL = urlDatabase[req.params.shortURL];
+  console.log('LONGURL');
+  console.log(longURL.longURL);
+  console.log('DONELONGURL');
   res.render("urls_show", templateVars);
 });
 
@@ -199,16 +217,16 @@ app.post("/register", (req, res) => {
   const userEmail = req.body.email; // just the email
 });
 
-//Evaluation In Case of Error 
+
+  /*---Error Evaluations---*/
 let evaluation = (getEmail(users, userEmail));
   if (evaluation === true) {
     console.log(`Error: 400. Email is already in use`);
     res.status(400).send(`Error: 400. Email is already in use`);
   }
 
-  // If email OR pwd are empty strings ...
+  // If email OR pwd are empty strings
   if ((!req.body.email) || (!req.body.password)) {
-    console.log(`Error: 400. Invalid email or password`);
     res.status(400).send(`Error: 400. Invalid email or password`);
   }
 
@@ -241,14 +259,12 @@ app.post("/login", (req, res) => {
   res.redirect("/landing");
 });
 
-  //Cookies Part
+  /*---Cookies---*/
   const userObj = users[randomUserID]; 
   res.cookie("user", userObj); 
   const foundUserID = getUserID(users, req.body.email);
   res.cookie("user_id", foundUserID);
   res.redirect("/urls"); 
-
-
 
 //Login In Header
 app.get("/login", (req, res) => {
@@ -262,6 +278,7 @@ app.post("/login", (req, res) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password; // For testing w/ bcrypt.compareSync; checks if input matches value in database
   const userPresence = emailPwdMatch(users, userEmail, userPassword);
+  const foundUserID = getUserID(users, req.body.email);
 });
 
  //Removing session upon logging out 

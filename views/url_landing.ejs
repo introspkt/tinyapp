@@ -14,10 +14,15 @@
     <%- include('partials/_header') %>
     <main>
       <h3>Welcome to tinyURL!</h3>
+      <div class="entry-card"></div>
       <h4>To enter the site, please log in or sign up ...</h4>
-      <button type="button" class="btn btn-outline-primary"><a href="/login">Log In</a></button>
-      <button type="button" class="btn btn-outline-success"><a href="/register">Sign Up</a></button>
-    </main>
+      <div class="buttons-row">
+        <button type="button" class="buttons" onclick="location.href='/login'">Log In</button>
+        <button type="button" class="buttons" onclick="location.href='/register'">Sign Up</button>
+      </div>
+    </div>
+  </main>
+  
       <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>

@@ -12,9 +12,10 @@
     </div>
   </nav>
   <% if (locals.user) { %>
+    <!-- Log Out -->
     <form method="POST" action="/logout">
-      <label>Logged in as: <%= user ["email"] %>!</label>
-      <button type="logout" class="btn btn-primary">Log Out</button>
+      <label>Logged in as <em><%= user["email"] %></em>&nbsp</label>
+        <button type="logout" class="btn btn-outline-primary">Log Out</button>
       </form>
     <% } else{ %>
       <!-- Log In -->
