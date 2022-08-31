@@ -6,12 +6,12 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls">New URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
   </nav>
-  <% if (locals.user) { %>
+  <% if (user) { %>
     <!-- Log Out -->
     <form method="POST" action="/logout">
       <label>Logged in as <em><%= user["email"] %></em>&nbsp</label>
@@ -20,10 +20,11 @@
     <% } else{ %>
       <!-- Log In -->
       <form method="POST" action="/login">
-        <input type="text" id="user" name="username" placeholder="Username">
-        <button type="submit" class="btn btnlight"><a href="/login"></a>>Log In</button>
+        <button type="submit" class="btn btn-light"onclick="location.href='/login'" style="margin-right: 10px">Log In</button>
       </form>
-      <button type="submit" class="btn btn-light"><a href="/register">Register</a></button>
+      <form method="GET" action="/register"></form>
+      <button type="submit" class="btn btn-light" onclick="location.href='/register'">Register</button>
+    </form>
     <% } %>
     </nav>
 </header>
