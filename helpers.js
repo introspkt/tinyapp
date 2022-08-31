@@ -1,5 +1,5 @@
 // Helper data:
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 // Generate random string for user ID
 const generateRandomString = function() {
@@ -10,7 +10,7 @@ const generateRandomString = function() {
 const getEmail = function(obj, str) {
   for (const id in obj) {
     if (obj[id].email === str) {
-      return true; // BAD CASE - if email is in obj, return true
+      return true;
     }
   }
 };
@@ -19,7 +19,7 @@ const getEmail = function(obj, str) {
 const emailPwdMatch = function(obj, email, pwd) {
   for (const id in obj) {
     if ((obj[id].email === email) && (bcrypt.compareSync(pwd, obj[id].password))) {
-      return true; // GOOD CASE - email & password pair exists, so user exists
+      return true; 
     }
   }
 };
@@ -41,12 +41,12 @@ const urlsForUser = function(userID, databaseObj) {
   // identify which DATABASE object contains the same ID as current user
   for (const shortURL in databaseObj) {
     let databaseUserID = databaseObj[shortURL].userID;
-
+    
     if (userID === databaseUserID) {
       newUserObj[shortURL] = databaseObj[shortURL];
     }
   }
-  return newUserObj; // returns URLs made by current user
+  return newUserObj;
 };
 
-module.exports = { generateRandomString, getEmail, emailPwdMatch, getUserID, urlsForUser }; 
+module.exports = { generateRandomString, getEmail, emailPwdMatch, getUserID, urlsForUser };
