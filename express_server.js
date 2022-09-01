@@ -5,7 +5,6 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 const { generateRandomString, getEmail, emailPwdMatch, getUserID, urlsForUser } = require("./helpers");
 const cookieSession = require('cookie-session');
-app.use(cookie-session())
 const bcrypt = require('bcrypt');
 
 /*              MIDDLEWARE                */
@@ -22,8 +21,12 @@ app.use(cookieSession({
 
 /*               DATA                     */
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+  } ,
+  "9sm5xK": { 
+    longURL:"http://www.google.com",
+  }
 };
 app.use(express.urlencoded({ extended: true }));
 
